@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -108,7 +111,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductDTO updateProductImage(Long productId, MultipartFile image) {
+    public ProductDTO updateProductImage(Long productId, MultipartFile image) throws IOException {
         //get the product from the db
         Product productFromDb=productRepository.findById(productId)
                 .orElseThrow(()->new ResourceNotFoundException("Product","productId",productId));
@@ -129,9 +132,9 @@ public class ProductServiceImpl implements ProductService{
         return modelMapper.map(updatedProduct,ProductDTO.class);
     }
 
-    private String uploadImage(String path, MultipartFile file) {
+    private String uploadImage(String path, MultipartFile file) throws IOException {
        //file names of all original/current file
-        String originalFileName=file.getName();
+        String originalFileName=file.getOriginalFilename();
 
         //generate a unique file name
         String randomId= UUID.randomUUID().toString();
@@ -139,9 +142,17 @@ public class ProductServiceImpl implements ProductService{
         String filePath=path + File.pathSeparator+fileName;
 
         //check if path exist and create
+        File folder =new File(path);
+        if(!folder.exists()){
+            folder.mkdir();
+        }
+
 
         //upload to server
+        Files.copy(file.getInputStream(), Paths.get(filePath));
+
         //returning file name
+        return fileName;
     }
 
 }
