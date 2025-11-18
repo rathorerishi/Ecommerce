@@ -1,5 +1,6 @@
 package com.ecommerce.project.security.jwt;
 
+
 public class LoginRequest {
     private String username;
     private String password;
